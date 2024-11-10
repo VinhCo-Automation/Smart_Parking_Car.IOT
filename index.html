@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điều khiển đèn LED</title>
+    <style>
+        /* Reset một số thuộc tính mặc định */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Thiết lập nền cho trang */
+        body {
+            background-color: #f4f7fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+            color: #333;
+        }
+
+        /* Tiêu đề */
+        #title {
+            font-size: 4em;
+            color: #000000;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tiêu đề phụ */
+        #subTitle {
+            font-size: 2.5em;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Nút bấm */
+        #btnBat {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 20px 40px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 10px; /* Thêm khoảng cách giữa các nút */
+        }
+        #btnTat {
+            background-color: #cd2121;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 20px 40px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 10px; /* Thêm khoảng cách giữa các nút */
+        }
+
+        /* Hiệu ứng khi hover */
+        #btnBat:hover{
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+        #btnTat:hover {
+            background-color: #b30d0d;
+            transform: scale(1.1);
+        }
+
+        /* Hiệu ứng khi click */
+        #btnBat:active, #btnTat:active {
+            transform: scale(1.05);
+        }
+
+        /* Thông báo */
+        #thongBao {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #ffcccc;
+            padding: 15px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s; /* Hiệu ứng chuyển màu */
+        }
+
+        /* Đèn sáng */
+        #thongBao.on {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Đèn tắt */
+        #thongBao.off {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tiêu đề trang của bạn -->
+    <h1 id="title">Võ Vinh Cơ</h1>  <!-- Tên của bạn -->
+    <h2 id="subTitle">Điều khiển đèn LED</h2>  <!-- Tiêu đề chính của trang -->
+    
+    <!-- Các nút bấm điều khiển đèn -->
+    <button id="btnBat">BẬT ĐÈN</button>
+    <button id="btnTat">TẮT ĐÈN</button>
+
+    <!-- Thông báo trạng thái đèn -->
+    <p id="thongBao" class="off">Đèn đang tắt</p>
+
+    <script>
+        // Lấy các phần tử cần thiết từ DOM
+        const btnBat = document.getElementById('btnBat');
+        const btnTat = document.getElementById('btnTat');
+        const thongBao = document.getElementById('thongBao');
+
+        // Hàm bật đèn
+        btnBat.addEventListener('click', function() {
+            thongBao.textContent = "Đèn đang sáng";
+            thongBao.classList.remove('off');
+            thongBao.classList.add('on');
+        });
+
+        // Hàm tắt đèn
+        btnTat.addEventListener('click', function() {
+            thongBao.textContent = "Đèn đang tắt";
+            thongBao.classList.remove('on');
+            thongBao.classList.add('off');
+        });
+    </script>
+</body>
+</html>
