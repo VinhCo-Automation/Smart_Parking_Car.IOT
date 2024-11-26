@@ -1,163 +1,57 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Điều khiển đèn LED</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
-        body {
-            background-color: #f4f7fc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            text-align: center;
-            color: #333;
-        }
-
-        #title {
-            font-size: 4em;
-            color: #000000;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        #subTitle {
-            font-size: 2.5em;
-            color: #4CAF50;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        #btnBat {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 20px 40px;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin: 10px;
-        }
-        #btnTat {
-            background-color: #cd2121;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 20px 40px;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin: 10px;
-        }
-
-        #btnBat:hover{
-            background-color: #45a049;
-            transform: scale(1.1);
-        }
-        #btnTat:hover {
-            background-color: #b30d0d;
-            transform: scale(1.1);
-        }
-
-        #btnBat:active, #btnTat:active {
-            transform: scale(1.05);
-        }
-
-        #thongBao {
-            margin-top: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #fff;
-            background-color: #ffcccc;
-            padding: 15px;
-            border-radius: 10px;
-            width: 300px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s;
-        }
-
-        #thongBao.on {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        #thongBao.off {
-            background-color: #f44336;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Realtime Database Demo</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js"></script>
 </head>
 <body>
-    <script type="module">
-        // Import necessary Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  <h1>Firebase Realtime Database Demo</h1>
+  <ul id="data-list"></ul>
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyBT8cNfruU8BoE078mfb8yqWgFXfFCGqyM",
-          authDomain: "smartparkingcar-iot.firebaseapp.com",
-          databaseURL: "https://smartparkingcar-iot-default-rtdb.firebaseio.com",
-          projectId: "smartparkingcar-iot",
-          storageBucket: "smartparkingcar-iot.firebasestorage.app",
-          messagingSenderId: "281534051957",
-          appId: "1:281534051957:web:1641f4ac5e6b7bbe1cea3c",
-          measurementId: "G-VQ65B9XRCD"
-        };
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDi1gTt2xyj8VRmKWN8EyaHsroazh--2jg",
+      authDomain: "smart-parking-car-iot.firebaseapp.com",
+      databaseURL: "https://smart-parking-car-iot-default-rtdb.firebaseio.com",
+      projectId: "smart-parking-car-iot",
+      storageBucket: "smart-parking-car-iot.firebasestorage.app",
+      messagingSenderId: "603168335075",
+      appId: "1:603168335075:web:ab5b3ad4712203a5a811d6",
+      measurementId: "G-Q5D2KJN408"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database(app);
 
-        // Reference to LED state in the database
-        const ledStateRef = ref(db, 'ledState');
+    // Hàm hiển thị dữ liệu
+    function displayData(snapshot) {
+      const dataList = document.getElementById('data-list');
+      dataList.innerHTML = "";  // Xóa danh sách trước khi cập nhật dữ liệu mới
 
-        // Function to update the LED state in Firebase
-        function updateLEDState(state) {
-            set(ledStateRef, state);
-        }
+      // Lấy dữ liệu từ Firebase: ESP_Send -> python_send -> send_python
+      const data = snapshot.val().ESP_Send.python_send.send_python;
 
-        // Listen for changes in the LED state from Firebase and update the UI
-        onValue(ledStateRef, (snapshot) => {
-            const ledState = snapshot.val();
-            const thongBao = document.getElementById('thongBao');
-            if (ledState === "on") {
-                thongBao.textContent = "Đèn đang bật";
-                thongBao.classList.remove('off');
-                thongBao.classList.add('on');
-            } else {
-                thongBao.textContent = "Đèn đang tắt";
-                thongBao.classList.remove('on');
-                thongBao.classList.add('off');
-            }
-        });
+      const humidity = data.Humidity;
+      const temperature = data.Temperature;
 
-        // Button event listeners
-        document.getElementById('btnBat').addEventListener('click', () => {
-            updateLEDState('on');
-        });
+      // Hiển thị dữ liệu lên giao diện
+      const listItem = document.createElement('li');
+      listItem.textContent = `Humidity: ${humidity}%, Temperature: ${temperature}°C`;
+      dataList.appendChild(listItem);
+    }
 
-        document.getElementById('btnTat').addEventListener('click', () => {
-            updateLEDState('off');
-        });
-    </script>
-
-    <h1 id="title">Võ Vinh Cơ</h1>
-    <h2 id="subTitle">Điều khiển đèn LED</h2>
-    <button id="btnBat">BẬT ĐÈN</button>
-    <button id="btnTat">TẮT ĐÈN</button>
-    <p id="thongBao" class="off">Đèn đang tắt</p>
+    // Lắng nghe sự thay đổi trong Realtime Database
+    const dataRef = database.ref('ESP_Send'); // Trỏ tới `ESP_Send`
+    dataRef.on('value', (snapshot) => {
+      displayData(snapshot);
+    });
+  </script>
 </body>
 </html>
