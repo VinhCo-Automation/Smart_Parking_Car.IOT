@@ -29,9 +29,13 @@
     // Hàm hiển thị dữ liệu từ Firebase
     function displayData(snapshot) {
       const data = snapshot.val();
-      const humidity = data.send_python.Humidity;
-      const temperature = data.send_python.Temperature;
-      document.getElementById('data').innerHTML = `Humidity: ${humidity}% | Temperature: ${temperature}°C`;
+      if (data && data.send_python) {
+        const humidity = data.send_python.Humidity;
+        const temperature = data.send_python.Temperature;
+        document.getElementById('data').innerHTML = `Humidity: ${humidity}% | Temperature: ${temperature}°C`;
+      } else {
+        document.getElementById('data').innerHTML = 'No data available.';
+      }
     }
 
     // Lắng nghe thay đổi dữ liệu từ Firebase Realtime Database
