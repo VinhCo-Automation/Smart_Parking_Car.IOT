@@ -4,14 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Firebase Realtime Database Demo</title>
-  <!-- Firebase SDKs -->
+  
+  <!-- Thêm Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js"></script>
-</head>
-<body>
-  <h1>Firebase Realtime Database Demo</h1>
-  <ul id="data-list"></ul>
 
   <script>
     // Firebase configuration
@@ -26,32 +22,27 @@
       measurementId: "G-Q5D2KJN408"
     };
 
-    // Initialize Firebase
+    // Khởi tạo Firebase
     const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database(app);
+    const database = firebase.database();
 
-    // Hàm hiển thị dữ liệu
+    // Hàm hiển thị dữ liệu từ Firebase
     function displayData(snapshot) {
-      const dataList = document.getElementById('data-list');
-      dataList.innerHTML = "";  // Xóa danh sách trước khi cập nhật dữ liệu mới
-
-      // Lấy dữ liệu từ Firebase: ESP_Send -> python_send -> send_python
-      const data = snapshot.val().ESP_Send.python_send.send_python;
-
-      const humidity = data.Humidity;
-      const temperature = data.Temperature;
-
-      // Hiển thị dữ liệu lên giao diện
-      const listItem = document.createElement('li');
-      listItem.textContent = `Humidity: ${humidity}%, Temperature: ${temperature}°C`;
-      dataList.appendChild(listItem);
+      const data = snapshot.val();
+      const humidity = data.send_python.Humidity;
+      const temperature = data.send_python.Temperature;
+      document.getElementById('data').innerHTML = `Humidity: ${humidity}% | Temperature: ${temperature}°C`;
     }
 
-    // Lắng nghe sự thay đổi trong Realtime Database
-    const dataRef = database.ref('ESP_Send'); // Trỏ tới `ESP_Send`
+    // Lắng nghe thay đổi dữ liệu từ Firebase Realtime Database
+    const dataRef = database.ref('send_python'); // Truy cập vào node send_python
     dataRef.on('value', (snapshot) => {
       displayData(snapshot);
     });
   </script>
+</head>
+<body>
+  <h1>Firebase Realtime Database Demo</h1>
+  <div id="data">Loading...</div>
 </body>
 </html>
