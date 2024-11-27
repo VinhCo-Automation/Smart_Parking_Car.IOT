@@ -1,52 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Realtime Database Demo</title>
-  
-  <!-- Thêm Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
-
-  <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDi1gTt2xyj8VRmKWN8EyaHsroazh--2jg",
-      authDomain: "smart-parking-car-iot.firebaseapp.com",
-      databaseURL: "https://smart-parking-car-iot-default-rtdb.firebaseio.com",
-      projectId: "smart-parking-car-iot",
-      storageBucket: "smart-parking-car-iot.firebasestorage.app",
-      messagingSenderId: "603168335075",
-      appId: "1:603168335075:web:ab5b3ad4712203a5a811d6",
-      measurementId: "G-Q5D2KJN408"
-    };
-
-    // Khởi tạo Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    // Hàm hiển thị dữ liệu từ Firebase
-    function displayData(snapshot) {
-      const data = snapshot.val();
-      if (data && data.send_python) {
-        const humidity = data.send_python.Humidity;
-        const temperature = data.send_python.Temperature;
-        document.getElementById('data').innerHTML = `Humidity: ${humidity}% | Temperature: ${temperature}°C`;
-      } else {
-        document.getElementById('data').innerHTML = 'No data available.';
-      }
-    }
-
-    // Lắng nghe thay đổi dữ liệu từ Firebase Realtime Database
-    const dataRef = database.ref('send_python'); // Truy cập vào node send_python
-    dataRef.on('value', (snapshot) => {
-      displayData(snapshot);
-    });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Web App</title>
 </head>
 <body>
-  <h1>Firebase Realtime Database Demo</h1>
-  <div id="data">Loading...</div>
+    <form id="dataForm">
+        <input type="text" id="name" placeholder="Tên">
+        <input type="number" id="age" placeholder="Tuổi">
+        <button type="submit">Gửi</button>
+    </form>
+    
+    <ul id="dataList"></ul>
+
+    <!-- Đảm bảo sử dụng type="module" -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDi1gTt2xyj8VRmKWN8EyaHsroazh--2jg",
+            authDomain: "smart-parking-car-iot.firebaseapp.com",
+            databaseURL: "https://smart-parking-car-iot-default-rtdb.firebaseio.com",
+            projectId: "smart-parking-car-iot",
+            storageBucket: "smart-parking-car-iot.firebasestorage.app",
+            messagingSenderId: "603168335075",
+            appId: "1:603168335075:web:9004db6a22f8b842a811d6",
+            measurementId: "G-CVC0QN2BJG"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Thêm dữ liệu vào Firebase Realtime Database
+        // Thêm dữ liệu vào Firebase Realtime Database với ID cố định
+document.getElementById('dataForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Ngăn trang web reload
+
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+
+    // Sử dụng ID cố định cho mỗi người dùng
+    const userId = "name_and_age"; // Thay đổi ID cố định của người dùng
+    const dataRef = ref(database, 'users/' + userId); // Sử dụng ID cố định trong đường dẫn
+
+    set(dataRef, {
+        name: name,
+        age: age
+    }).then(() => {
+        alert('Dữ liệu đã được gửi thành công!');
+    }).catch((error) => {
+        console.error("Lỗi khi gửi dữ liệu:", error);
+    });
+
+    // Làm trống form sau khi gửi dữ liệu
+    document.getElementById('name').value = '';
+    document.getElementById('age').value = '';
+});
+
+
+        // Lắng nghe dữ liệu từ Firebase Realtime Database
+        const dataList = document.getElementById('dataList');
+
+        const usersRef = ref(database, 'users');
+        onChildAdded(usersRef, function(snapshot) {
+            const userData = snapshot.val();
+            const li = document.createElement('li');
+            li.textContent = `Tên: ${userData.name}, Tuổi: ${userData.age}`;
+            dataList.appendChild(li);
+        });
+    </script>
 </body>
 </html>
