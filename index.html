@@ -3,23 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Web App</title>
-</head>
-<body>
-    <form id="dataForm">
-        <input type="text" id="name" placeholder="Tên">
-        <input type="number" id="age" placeholder="Tuổi">
-        <button type="submit">Gửi</button>
-    </form>
-    
-    <ul id="dataList"></ul>
-
-    <!-- Đảm bảo sử dụng type="module" -->
+    <title>IoT Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js";
 
-        // Firebase configuration
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDi1gTt2xyj8VRmKWN8EyaHsroazh--2jg",
             authDomain: "smart-parking-car-iot.firebaseapp.com",
@@ -35,43 +25,256 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Thêm dữ liệu vào Firebase Realtime Database
-        // Thêm dữ liệu vào Firebase Realtime Database với ID cố định
-document.getElementById('dataForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Ngăn trang web reload
+        // Create chart contexts
+        const tempCtx = document.getElementById('temperatureChart').getContext('2d');
+        const humidityCtx = document.getElementById('humidityChart').getContext('2d');
 
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-
-    // Sử dụng ID cố định cho mỗi người dùng
-    const userId = "name_and_age"; // Thay đổi ID cố định của người dùng
-    const dataRef = ref(database, 'users/' + userId); // Sử dụng ID cố định trong đường dẫn
-
-    set(dataRef, {
-        name: name,
-        age: age
-    }).then(() => {
-        alert('Dữ liệu đã được gửi thành công!');
-    }).catch((error) => {
-        console.error("Lỗi khi gửi dữ liệu:", error);
-    });
-
-    // Làm trống form sau khi gửi dữ liệu
-    document.getElementById('name').value = '';
-    document.getElementById('age').value = '';
-});
-
-
-        // Lắng nghe dữ liệu từ Firebase Realtime Database
-        const dataList = document.getElementById('dataList');
-
-        const usersRef = ref(database, 'users');
-        onChildAdded(usersRef, function(snapshot) {
-            const userData = snapshot.val();
-            const li = document.createElement('li');
-            li.textContent = `Tên: ${userData.name}, Tuổi: ${userData.age}`;
-            dataList.appendChild(li);
+        // Initialize the temperature chart
+        const tempChart = new Chart(tempCtx, {
+            type: 'line',
+            data: {
+                labels: [], // Time labels will be added dynamically
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: [],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Temperature (°C)'
+                        }
+                    }
+                }
+            }
         });
+
+        // Initialize the humidity chart
+        const humidityChart = new Chart(humidityCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Humidity (%)',
+                    data: [],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Humidity (%)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Function to fetch and update data
+        function fetchData() {
+            const dataRef = ref(database, 'iotData');
+
+            onValue(dataRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    // Update HTML elements
+                    document.getElementById('licensePlate').textContent = data.licensePlate || "Loading...";
+                    document.getElementById('date').textContent = data.date || "Loading...";
+                    document.getElementById('time').textContent = data.time || "Loading...";
+                    document.getElementById('temperature').textContent = data.temperature || "Loading...";
+                    document.getElementById('humidity').textContent = data.humidity || "Loading...";
+                    document.getElementById('fireRisk').textContent = data.fireRisk || "Loading...";
+
+                    // Update charts with the latest data
+                    const currentTime = new Date().toLocaleTimeString(); // Get the current time
+
+                    // Update temperature chart
+                    if (data.temperature) {
+                        if (tempChart.data.labels.length >= 10) {
+                            tempChart.data.labels.shift(); // Remove the oldest label
+                            tempChart.data.datasets[0].data.shift(); // Remove the oldest data
+                        }
+                        tempChart.data.labels.push(currentTime);
+                        tempChart.data.datasets[0].data.push(data.temperature);
+                        tempChart.update();
+                    }
+
+                    // Update humidity chart
+                    if (data.humidity) {
+                        if (humidityChart.data.labels.length >= 10) {
+                            humidityChart.data.labels.shift(); // Remove the oldest label
+                            humidityChart.data.datasets[0].data.shift(); // Remove the oldest data
+                        }
+                        humidityChart.data.labels.push(currentTime);
+                        humidityChart.data.datasets[0].data.push(data.humidity);
+                        humidityChart.update();
+                    }
+                }
+            });
+        }
+
+        // Fetch data on page load and set up real-time updates
+        window.onload = fetchData;
+
     </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            border-bottom: 5px solid #3e8e41;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .info div {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            width: 30%;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .info div:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .info div strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .info div p {
+            font-size: 20px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        canvas {
+            margin: 30px 0;
+            display: block;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .info {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .info div {
+                width: 80%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        BÃI XE THÔNG MINH
+    </header>
+
+    <div class="container">
+        <div class="info">
+            <div>
+                <strong>Biển số:</strong>
+                <p id="licensePlate">Loading...</p>
+            </div>
+            <div>
+                <strong>Ngày:</strong>
+                <p id="date">Loading...</p>
+            </div>
+            <div>
+                <strong>Thời gian:</strong>
+                <p id="time">Loading...</p>
+            </div>
+        </div>
+
+        <div class="info">
+            <div>
+                <strong>Nhiệt độ (°C):</strong>
+                <p id="temperature">Loading...</p>
+            </div>
+            <div>
+                <strong>Độ ẩm (%):</strong>
+                <p id="humidity">Loading...</p>
+            </div>
+            <div>
+                <strong>Tỉ lệ cháy (%):</strong>
+                <p id="fireRisk">Loading...</p>
+            </div>
+        </div>
+
+        <canvas id="temperatureChart" width="400" height="200"></canvas>
+        <canvas id="humidityChart" width="400" height="200"></canvas>
+    </div>
 </body>
 </html>
