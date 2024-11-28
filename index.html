@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IoT Dashboard</title>
+    <title>Đồ án IOT</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Sử dụng type="module" để hỗ trợ import -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js";
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -24,6 +26,20 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+
+        // Hàm gửi dữ liệu khi nhấn nút
+        window.sendButtonData = function() {
+            const dataRef = ref(database, 'web'); // Đường dẫn đến dữ liệu iotData trong Firebase
+
+            // Cập nhật giá trị của button thành "True"
+            set(dataRef, {
+                button: "True", // Cập nhật giá trị button
+            }).then(() => {
+                console.log("Cập nhật button thành 'True' thành công");
+            }).catch((error) => {
+                console.error("Có lỗi khi cập nhật dữ liệu:", error);
+            });
+        };
 
         // Create chart contexts
         const chartCtx = document.getElementById('chart').getContext('2d');
@@ -137,12 +153,12 @@ body {
 }
 
 header {
-    background-color: #4CAF50;
+    background-color: #0177A9;
     color: white;
     text-align: center;
     padding: 20px;
     font-size: 24px;
-    border-bottom: 5px solid #3e8e41;
+    border-bottom: 5px solid #0177A9;
 }
 
 header img {
@@ -203,13 +219,13 @@ canvas {
 }
 
 footer {
-    background-color: #4CAF50;
+    background-color: #0177A9;
     color: white;
     padding: 20px;
     text-align: center;
     font-size: 16px;
     margin-top: 30px;
-    border-top: 5px solid #3e8e41;
+    border-top: 5px solid #0177A9;
 }
 
 .contact {
@@ -235,7 +251,17 @@ footer {
     text-decoration: none;
     font-weight: bold;
 }
-
+button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
 .contact a:hover {
     text-decoration: underline;
 }
@@ -259,6 +285,7 @@ footer {
 </head>
 <body>
 <header>
+    
 <h3>ĐỒ ÁN IOT VÀ ỨNG DỤNG DH21TD</h3>
 <h1>BÃI XE THÔNG MINH</h1>
 </header>
@@ -292,16 +319,12 @@ footer {
                 <strong>Tỉ lệ cháy (%):</strong>
                 <p id="fireRisk">10</p>
             </div>
-        </div>
-        <div class="video-container">
-            <h2>Video Camera</h2>
-            <img src="http://127.0.0.1:5000/video_feed" alt="Camera Feed">
-        </div>
+    </div>
+    <button onclick="sendButtonData()">Mở rào chắn</button>
+    </div>
         <canvas id="chart"></canvas>
-        <div>
+    <div>
         <h3>Quản lý dữ liệu: <a href="https://s.net.vn/uPYu">https://s.net.vn/uPYu</a></h3>
-        </div>
-        
     </div>
 
     <div class="contact">
