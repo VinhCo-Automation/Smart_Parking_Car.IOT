@@ -3,339 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đồ án IOT</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Sử dụng type="module" để hỗ trợ import -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js";
-
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDi1gTt2xyj8VRmKWN8EyaHsroazh--2jg",
-            authDomain: "smart-parking-car-iot.firebaseapp.com",
-            databaseURL: "https://smart-parking-car-iot-default-rtdb.firebaseio.com",
-            projectId: "smart-parking-car-iot",
-            storageBucket: "smart-parking-car-iot.firebasestorage.app",
-            messagingSenderId: "603168335075",
-            appId: "1:603168335075:web:9004db6a22f8b842a811d6",
-            measurementId: "G-CVC0QN2BJG"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        // Hàm gửi dữ liệu khi nhấn nút
-        window.sendButtonData = function() {
-            const dataRef = ref(database, 'web'); // Đường dẫn đến dữ liệu iotData trong Firebase
-
-            // Cập nhật giá trị của button thành "True"
-            set(dataRef, {
-                button: "True", // Cập nhật giá trị button
-            }).then(() => {
-                console.log("Cập nhật button thành 'True' thành công");
-            }).catch((error) => {
-                console.error("Có lỗi khi cập nhật dữ liệu:", error);
-            });
-        };
-
-        // Create chart contexts
-        const chartCtx = document.getElementById('chart').getContext('2d');
-
-// Initialize the combined chart
-const combinedChart = new Chart(chartCtx, {
-    type: 'line',
-    data: {
-        labels: [], // Time labels
-        datasets: [
-            {
-                label: 'Nhiệt độ (°C)',
-                data: [],
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-            },
-            {
-                label: 'Độ ẩm (%)',
-                data: [],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-        },
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Thời gian'
-                }
-            },
-            y: {
-                title: {
-                    display: true,
-                    text: 'Giá trị'
-                }
-            }
-        }
-    }
-});
-
-// Function to fetch and update data
-function fetchData() {
-    const dataRef = ref(database, 'iotData');
-
-    onValue(dataRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            // Update HTML elements
-            document.getElementById('licensePlate').textContent = data.licensePlate || "---";
-            document.getElementById('date').textContent = data.date || "---";
-            document.getElementById('time').textContent = data.time || "---";
-            document.getElementById('temperature').textContent = data.temperature || "---";
-            document.getElementById('humidity').textContent = data.humidity || "---";
-            document.getElementById('fireRisk').textContent = data.fireRisk || "---";
-
-            // Update charts with the latest data
-            const currentTime = new Date().toLocaleTimeString(); // Get the current time
-
-            // Update temperature chart
-            if (data.temperature) {
-                if (combinedChart.data.labels.length >= 10) {
-                    combinedChart.data.labels.shift(); // Remove the oldest label
-                    combinedChart.data.datasets[0].data.shift(); // Remove the oldest temperature data
-                }
-                combinedChart.data.labels.push(currentTime);
-                combinedChart.data.datasets[0].data.push(data.temperature);
-            }
-
-            // Update humidity chart
-            if (data.humidity) {
-                if (combinedChart.data.labels.length >= 10) {
-                    combinedChart.data.labels.shift(); // Remove the oldest label
-                    combinedChart.data.datasets[1].data.shift(); // Remove the oldest humidity data
-                }
-                combinedChart.data.labels.push(currentTime);
-                combinedChart.data.datasets[1].data.push(data.humidity);
-            }
-
-            combinedChart.update(); // Update the chart with new data
-        }
-    });
-}
-
-// Fetch data on page load and set up real-time updates
-window.onload = fetchData;
-
-</script>
-
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f6f8;
-    color: #333;
-    line-height: 1.6;
-}
-
-header {
-    background-color: #0177A9;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    font-size: 24px;
-    border-bottom: 5px solid #0177A9;
-}
-
-header img {
-    width: 100%;
-    height: auto;
-    max-height: 400px;
-    object-fit: cover;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 30px auto;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.info div {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    width: 30%;
-    text-align: center;
-    transition: transform 0.3s ease;
-}
-
-.info div:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-}
-
-.info div strong {
-    display: block;
-    font-size: 18px;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.info div p {
-    font-size: 20px;
-    font-weight: bold;
-    color: #444;
-}
-
-canvas {
-    margin: 30px 0;
-    display: block;
-    width: 100%;
-    border-radius: 10px;
-}
-
-footer {
-    background-color: #0177A9;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    font-size: 16px;
-    margin-top: 30px;
-    border-top: 5px solid #0177A9;
-}
-
-.contact {
-    margin-top: 50px;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.contact h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
-.contact p {
-    font-size: 18px;
-    margin: 10px 0;
-}
-
-.contact a {
-    color: #4CAF50;
-    text-decoration: none;
-    font-weight: bold;
-}
-button {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 24px;
-            background-color: #4CAF50;
+    <title>Đồ án IOT - Bãi Đỗ Xe</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* Cập nhật phong cách phần tiêu đề */
+        .header-section {
+            background-color: #0177A9;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px 0;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            border-bottom: 5px solid #0177A9;
         }
-.contact a:hover {
-    text-decoration: underline;
-}
 
-@media (max-width: 768px) {
-    .info {
-        flex-direction: column;
-        align-items: center;
-    }
+        .header-description {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
 
-    .info div {
-        width: 80%;
-        margin-bottom: 15px;
-    }
+        /* Hiệu ứng hover cho nút */
+        .btn:hover {
+            transform: scale(1.1);
+            transition: all 0.3s ease-in-out;
+        }
 
-    header img {
-        height: auto;
-    }
-}
-</style>
+        /* Viền màu xanh cho phần giới thiệu */
+        .intro-section {
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #f9f9f9;
+        }
+
+        /* Thông tin liên hệ ở dưới cùng */
+        .contact-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-top: 2px solid #007bff;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .contact-info h4 {
+            margin-bottom: 15px;
+        }
+
+        .contact-info p {
+            margin-bottom: 10px;
+        }
+
+        /* Hiệu ứng cho các bảng */
+        table {
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Nền màu xanh dương cho nút chuyển trang */
+        .btn-info {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .btn-info:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-<header>
-    
-<h3>ĐỒ ÁN IOT VÀ ỨNG DỤNG DH21TD</h3>
-<h1>BÃI XE THÔNG MINH</h1>
-</header>
+    <div class="container mt-5">
+        <!-- Tiêu đề với nền xanh dương -->
+        <div class="header-section">
+            <h1>Đồ án IOT - Bãi Đỗ Xe Thông Minh</h1>
+            <p class="header-description">Hệ thống tự động theo dõi biển số xe và thời gian vào/ra</p>
+        </div>
 
-<div class="container">
-<div class="info">
-    <div>
-        <strong>Biến số:</strong>
-        <p id="licensePlate">30A-12345</p>
-    </div>
-    <div>
-        <strong>Ngày:</strong>
-        <p id="date">2024-11-28</p>
-    </div>
-    <div>
-        <strong>Thời gian:</strong>
-        <p id="time">14:30</p>
-    </div>
-</div>
-
-<div class="info">
-    <div>
-        <strong>Nhiệt độ (°C):</strong>
-        <p id="temperature">25</p>
-    </div>
+        <div class="d-flex justify-content-around text-center mt-4 mb-5">
             <div>
-                <strong>Độ ẩm (%):</strong>
-                <p id="humidity">60</p>
+                <h5>Số lượng xe hiện tại</h5>
+                <p id="current-car-count" class="fw-bold">0</p>
             </div>
             <div>
-                <strong>Tỉ lệ cháy (%):</strong>
-                <p id="fireRisk">10</p>
+                <h5>Vị trí còn trống</h5>
+                <p id="available-spots" class="fw-bold">0</p>
             </div>
-    </div>
-    <button onclick="sendButtonData()">Mở rào chắn</button>
-    </div>
-        <canvas id="chart"></canvas>
-    <div>
-        <h3>Quản lý dữ liệu: <a href="https://s.net.vn/uPYu">https://s.net.vn/uPYu</a></h3>
+        </div>
+
+        <h2 class="text-center mt-5">Thông Tin Xe</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th colspan="3">Xe Vào</th>
+                        <th colspan="3">Xe Ra</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="in-license-plate">Biển số vào</td>
+                        <td id="in-date">Ngày vào</td>
+                        <td id="in-time">Thời gian vào</td>
+                        <td id="out-license-plate">Biển số ra</td>
+                        <td id="out-date">Ngày ra</td>
+                        <td id="out-time">Thời gian ra</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-around mt-4">
+            <button class="btn btn-primary" id="open-gate-in">Mở Cửa Vào</button>
+            <button class="btn btn-danger" id="open-gate-out">Mở Cửa Ra</button>
+        </div>
+
+        <h2 class="text-center mt-5">Danh Sách Xe</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Số Thứ Tự</th>
+                        <th>Biển Số Xe</th>
+                        <th>Thời Gian Vào</th>
+                        <th>Thời Gian Ra</th>
+                    </tr>
+                </thead>
+                <tbody id="car-list">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <p>Giám sát dữ liệu: <a href="http://surl.li/lczsue" target="_blank">http://surl.li/lczsue</a></p>
+        </div>
+
+        <!-- Button to switch to web2 -->
+        <div class="text-center mt-4">
+            <button class="btn btn-info" id="switch-to-web2">Chuyển sang Web 2</button>
+        </div>
+
+        <!-- Thông tin liên hệ -->
+        <div class="contact-info">
+            <h4>Liên Hệ Với Chúng Tôi</h4>
+            <p>Nếu bạn có bất kỳ câu hỏi hoặc phản hồi nào, hãy liên hệ với chúng tôi:</p>
+            <p>Email: covo488@gmail.com hoặc daoduycuong2k3@gmail.com</p>
+            <p>Phone: 0363631682</p>
+        </div>
     </div>
 
-    <div class="contact">
-        <h2>Liên hệ với chúng tôi</h2>
-        <p>Nếu bạn có bất kỳ câu hỏi hoặc phản hồi nào, hãy liên hệ với chúng tôi:</p>
-        <p>Email: <a href="mailto:support@example.com">covo488@gmail.com</a></p>
-        <p>Phone: 0789.661.260</p>
-    </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAy3lTCpTJ-t0fs4CA36WazSDcKN6VP4xg",
+            authDomain: "iot-2024-b888a.firebaseapp.com",
+            databaseURL: "https://iot-2024-b888a-default-rtdb.firebaseio.com",
+            projectId: "iot-2024-b888a",
+            storageBucket: "iot-2024-b888a.appspot.com",
+            messagingSenderId: "954868204016",
+            appId: "1:954868204016:web:4da827c214c12fead09d35",
+            measurementId: "G-2H4YDJKYHF"
+        };
 
-    <footer>
-        <p>Web được phát triển bởi Võ Vinh Cơ</p>
-    </footer>
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const PASSWORD = "123456";
+
+        let isGateInOpen = false;
+        let isGateOutOpen = false;  // Cần để riêng biệt cho cổng vào và ra
+
+        function toggleGate(gate, isOpen) {
+            const path = gate === 'in' ? 'iotdata1/in/button' : 'iotdata1/out/button';
+            database.ref(path).set(isOpen);
+        }
+
+        document.getElementById('open-gate-in').addEventListener('click', () => {
+            const enteredPassword = prompt("Nhập mật khẩu để mở cửa vào:");
+            if (enteredPassword === PASSWORD) {
+                isGateInOpen = !isGateInOpen;
+                toggleGate('in', isGateInOpen);
+                document.getElementById('open-gate-in').textContent = isGateInOpen ? 'Đã Mở Cửa Vào' : 'Mở Cửa Vào';
+            } else {
+                alert("Mật khẩu không đúng!");
+            }
+        });
+
+        document.getElementById('open-gate-out').addEventListener('click', () => {
+            const enteredPassword = prompt("Nhập mật khẩu để mở cửa ra:");
+            if (enteredPassword === PASSWORD) {
+                isGateInOpen = !isGateInOpen;  // Chỉnh sửa từ isGateInOpen thành isGateOutOpen
+                toggleGate('out', isGateInOpen);  // Cập nhật đến 'out' thay vì 'in'
+                document.getElementById('open-gate-out').textContent = isGateInOpen ? 'Đã Mở Cửa Ra' : 'Mở Cửa Ra';
+            } else {
+                alert("Mật khẩu không đúng!");
+            }
+        });
+
+        const dataRef = database.ref('iotdata1');
+        dataRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            document.getElementById('in-license-plate').textContent = data.in?.licensePlate || "Không có dữ liệu";
+            document.getElementById('in-date').textContent = data.in?.date || "Không có dữ liệu";
+            document.getElementById('in-time').textContent = data.in?.time || "Không có dữ liệu";
+
+            document.getElementById('out-license-plate').textContent = data.in?.licensePlate || "Không có dữ liệu";
+            document.getElementById('out-date').textContent = data.in?.date || "Không có dữ liệu";
+            document.getElementById('out-time').textContent = data.in?.time || "Không có dữ liệu";
+
+            if (data.history) {
+                const carList = document.getElementById('car-list');
+                carList.innerHTML = "";
+
+                let currentCarCount = 0;
+                Object.keys(data.history).forEach((key, index) => {
+                    const record = data.history[key];
+                    if (!record.outTime) {
+                        currentCarCount++;
+                    }
+
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${record.licensePlate1 || "Không có dữ liệu"}</td>
+                            <td>${record.inTime || "Không có dữ liệu"}</td>
+                            <td>${record.outTime || "Không có dữ liệu"}</td>
+                        </tr>
+                    `;
+                    carList.insertAdjacentHTML('beforeend', row);
+                });
+
+                const totalSlots = 100;
+                document.getElementById('current-car-count').textContent = currentCarCount;
+                document.getElementById('available-spots').textContent = totalSlots - currentCarCount;
+            }
+        });
+        document.getElementById('switch-to-web2').addEventListener('click', () => {
+    window.location.href = '2.html'; // Replace with your Web 2 URL
+});
+    </script>
 </body>
 </html>
