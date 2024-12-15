@@ -78,6 +78,22 @@
         .btn-info:hover {
             background-color: #0056b3;
         }
+        #image{
+            display: flex;
+            justify-content: center;
+            width: 100%;            
+            margin: 0;              
+            background-color: white;
+            animation: bounce 2s ease infinite;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -87,7 +103,9 @@
             <h1>Đồ án IOT - Bãi Đỗ Xe Thông Minh</h1>
             <p class="header-description">Hệ thống tự động theo dõi biển số xe và thời gian vào/ra</p>
         </div>
-
+        <div id="image">
+            <img src="https://img.freepik.com/free-vector/underground-parking-illustration_1284-17040.jpg?t=st=1734278649~exp=1734282249~hmac=1d252cc2920bb021d15356a4ac5f589acb80d9dac1ab6ade16874aafa677195a&w=1380" alt="Ảnh" width="626" height="381">
+        </div>
         <div class="d-flex justify-content-around text-center mt-4 mb-5">
             <div>
                 <h5>Số lượng xe hiện tại</h5>
